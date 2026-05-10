@@ -1,0 +1,21 @@
+Frequently Asked Questions
+
+1) Refund Policy
+Customers can request a refund within 14 days of purchase if the product has not been fully consumed.
+Refund requests are reviewed in 2-3 business days.
+
+2) Password Reset
+Users can reset passwords from the login page by clicking 'Forgot Password'.
+Password reset links expire in 30 minutes.
+
+3) Delivery Delay
+Standard delivery can take 3-7 business days.
+If delivery exceeds 10 business days, users can raise a support ticket.
+
+4) Billing Errors
+Duplicate charge complaints should include transaction ID and billing date.
+Finance support resolves billing disputes within 5 business days.
+
+5) Service Outage
+Known service outages are posted on the status page.
+Critical enterprise outages are prioritized for immediate incident response.
