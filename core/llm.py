@@ -5,6 +5,15 @@ from langchain_core.messages import HumanMessage, SystemMessage
 
 from core.config import settings
 
+# Gracefully imported — only present when langchain_google_genai is installed
+try:
+    from google.api_core.exceptions import NotFound as _GoogleNotFound
+    from google.api_core.exceptions import ResourceExhausted as _GoogleQuotaError
+except ImportError:  # pragma: no cover
+    _GoogleNotFound = None
+    _GoogleQuotaError = None
+
+
 
 class LLMFactory:
     @staticmethod
@@ -58,7 +67,35 @@ class SafeLLM:
                 "fully generated answers."
             )
 
-        response = self.model.invoke(
-            [SystemMessage(content=system_prompt), HumanMessage(content=user_prompt)]
-        )
-        return str(response.content)
+        try:
+            response = self.model.invoke(
+                [SystemMessage(content=system_prompt), HumanMessage(content=user_prompt)]
+            )
+            return str(response.content)
+        except Exception as exc:
+            exc_type = type(exc).__name__
+            exc_str = str(exc)
+
+            # Quota / rate-limit exceeded
+            if _GoogleQuotaError and isinstance(exc, _GoogleQuotaError):
+                return (
+                    "⚠️ The Gemini API quota has been exhausted for this API key. "
+                    "Please wait a few minutes and try again, or switch to a different "
+                    "LLM provider in the sidebar."
+                )
+
+            # Model not found / deprecated
+            if _GoogleNotFound and isinstance(exc, _GoogleNotFound):
+                return (
+                    f"⚠️ The configured Gemini model was not found: {exc_str}. "
+                    "Please update GEMINI_MODEL in your .env file."
+                )
+
+            # Generic fallback — surface the error message without a full traceback
+            if "ResourceExhausted" in exc_type or "429" in exc_str:
+                return (
+                    "⚠️ API quota exceeded. Please retry in a moment or switch to "
+                    "another LLM provider."
+                )
+
+            raise
